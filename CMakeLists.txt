@@ -1,19 +1,30 @@
-cmake_minimum_required (VERSION 2.6)
+#cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required(VERSION 3.1)
+cmake_policy(SET CMP0079 NEW)
 
 project (libblinkstick LANGUAGES C)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+include(GNUInstallDirs)
 
-option(BUILD_DOCS "Build documentation" ON)
+option(BUILD_DOCS "Build documentation" OFF)
 option(BUILD_CLI "Build command line BlinkStick control program" ON)
 
 if(WIN32)
   list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-  find_package(HIDAPI REQUIRED)
+  # find_package(HIDAPI REQUIRED)
 else(WIN32)
   find_package(PkgConfig REQUIRED)
-  pkg_search_module(HIDAPI REQUIRED hidapi)
+  # pkg_search_module(HIDAPI REQUIRED hidapi)
 endif(WIN32)
 
-include_directories(PUBLIC ${HIDAPI_INCLUDE_DIRS})
+# br
+include_directories(hidapi)
+include_directories(libblinkstick)
+find_package(PkgConfig REQUIRED)
+pkg_search_module(HIDAPI_LIBUSB REQUIRED hidapi-libusb)
+
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/target)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/target)
@@ -53,3 +64,7 @@ set(libblinkstick_VERSION_PATCH 0)
 
 set(libblinkstick_VERSION "${libblinkstick_VERSION_MAJOR}.${libblinkstick_VERSION_MINOR}.${libblinkstick_VERSION_PATCH}")
 add_subdirectory(src)
+
+target_compile_options(libblinkstick PRIVATE ${HIDAPI_LIBUSB_CFLAGS})
+target_link_libraries(libblinkstick ${HIDAPI_LIBUSB_LDFLAGS})
+
